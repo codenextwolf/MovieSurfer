@@ -1,5 +1,7 @@
 package com.example.moviesurfer;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
@@ -28,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
     TextView runtimeTextView;
     TextView imdbRatingTextView;
     ImageView moviePosterImageView;
+    String moviePosterUrl;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
                             runtimeTextView.setText(runtimeText);
                             String imdbRatingText = "IMDB Rating: " + responseObject.getString("imdbRating");
                             imdbRatingTextView.setText(imdbRatingText);
-                            String moviePosterUrl = responseObject.getString("Poster");
+                            moviePosterUrl = responseObject.getString("Poster");
                             Picasso.get().load(moviePosterUrl).into(moviePosterImageView);
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -80,4 +83,31 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    public void addToFavs(View view) {
+        //Get a reference to SharedPreferences
+        SharedPreferences sharedPreferences = getSharedPreferences("MySharedPref", MODE_PRIVATE);
+
+        //Get the favorites string from SharedPreferences (or an empty string if there are no favorites saved)
+        String favorites = sharedPreferences.getString("favorites", "");
+
+        //Get a reference to edit so we can update the favorites string
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+
+        //Add the current movie poster URL to the favorites
+        //if there are favorites, concatenate the new poster URL being added and separate it with a comma
+        //if not, just add the moviePoster URL
+        if(favorites.length() > 0) {
+            editor.putString("favorites", favorites + "," + moviePosterUrl);
+        } else {
+            editor.putString("favorites", moviePosterUrl);
+        }
+
+        //apply the changes to SharedPreferences
+        editor.apply();
+    }
+
+    public void openFavorites(View view) {
+        Intent intentToFavorites = new Intent(this, FavoritesActivity.class);
+        startActivity(intentToFavorites);
+    }
 }
